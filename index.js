@@ -7,15 +7,11 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-// CORS configuration
-const corsOptions = {
-  origin: 'https://onext-client-git-main-virajsamarasinghes-projects-97d26de3.vercel.app', // replace with your frontend domain
-  optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
 
 // middleware
+app.use(cors());
 app.use(express.json());
+
 
 // MongoDB config
 mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@onext.vzylp2o.mongodb.net/`)
@@ -23,14 +19,16 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD
     console.log("MongoDB Connected Successfully!")
 ).catch((error) => console.log("Error connecting to MongoDB", error));
 
-// jwt authentication
-app.post('/jwt', async(req, res) => {
-  const user = req.body;
-  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: '1hr'
+
+  // jwt authentication
+  app.post('/jwt', async(req, res) => {
+    const user = req.body;
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: '1hr'
+    })
+    res.send({token});
   })
-  res.send({token});
-})
+
 
 // import routes here
 const menuRoutes = require('./api/routes/menuRoutes');
@@ -59,6 +57,7 @@ app.post("/create-payment-intent", async (req, res) => {
     clientSecret: paymentIntent.client_secret,
   });
 });
+
 
 app.get('/', (req, res) => {
   res.send('Hello onext server');
